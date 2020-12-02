@@ -6,6 +6,7 @@
     "description": "PHP-SDK for kadam.net",
     "keywords": ["kadam", "kadam sdk", "sdk", "php"],
     "homepage": "https://kadam.net",
+    "license": "MIT",
     "authors": [
         {
             "name": "darkfriend",
