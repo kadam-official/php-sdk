@@ -46,7 +46,7 @@ class KadamApi
         'learningPayMode' => 'learning_pay_mode',
         'leadCost' => 'cost',
         'devices' => 'deviceTarget',
-        'sex' => 'gender',
+        'gender' => 'sex',
         'countries' => 'countryTarget',
         'regions' => 'regionTarget',
         'cities' => 'cityTarget',
@@ -62,6 +62,7 @@ class KadamApi
      * api scheme
      * @var string
      */
+//    const API_URL = 'http://api.kadam-docker-old.sdev.pw/%action%.%method%?%params%';
     const API_URL = 'http://api.kadam.net/%action%.%method%?%params%';
 
     /**
@@ -339,10 +340,10 @@ class KadamApi
      * @param array{
      *     type:integer, // mandatory, advertise format (10 - teaser, 20 - banner, 30 - push, 40 - clickunder, 70 - video)
      *     cpType:integer, // integer mandatory, cost type (0 - cpc, 2 - cpm)
-     *     cpaMode:integer, // mandatory
+     *     cpaMode:integer, // mandatory (10 - Postback URL, 20 - Javascript)
      *     payMode:integer, // mandatory when costType=0
      *     pushType:integer|integer[], // mandatory when type=30 (1 - )
-     *     learningPayMode:integer, // mandatory
+     *     learningPayMode:integer, // (10 - cpm, 20 - cpc)
      *     leadCost:integer, // mandatory
      *     name:string, // mandatory
      *     countries:array, // mandatory
@@ -377,8 +378,6 @@ class KadamApi
         $requireFields = [
             'type',
             'cpType',
-            'cpaMode',
-            'learningPayMode',
             'leadCost',
             'name',
             'countries',
@@ -400,8 +399,8 @@ class KadamApi
             'client_id' => $this->appID,
             'ad_format' => (int) $fields['type'], //Баннерная
             'cost_type' => (int) $fields['cpType'], // СРA
-            'cpa_mode' => (int) $fields['cpaMode'], //postback
-            'learning_pay_mode' => (int) $fields['learningPayMode'], //CPC
+            'cpa_mode' => $fields['cpaMode'] ?? 10, //postback
+            'learning_pay_mode' => $fields['learningPayMode'] ?? 10, //CPC
             'cost' => $fields['leadCost'], // conversion cost
             'name' => $fields['name'],
             'geoExclude' => isset($fields['geoExclude']) ? $fields['geoExclude'] : 0,
@@ -424,11 +423,18 @@ class KadamApi
             unset($fields['url']);
         }
 
+        $excludeFieldsFormatted = [
+            'tags',
+            'categories',
+        ];
+
         foreach ($fields as $field => $value) {
             if(isset($this->mapFieldsCampaign[$field])) {
                 $field = $this->mapFieldsCampaign[$field];
             }
-            if(!isset($campaignData[$field])) {
+            if(\in_array($field,$excludeFieldsFormatted)) {
+                $campaignData[$field] = $value;
+            } elseif(!isset($campaignData[$field])) {
                 $campaignData[$field] = $this->getValueFormatted($value);
             }
         }
@@ -459,7 +465,11 @@ class KadamApi
             $value = '';
         } else {
             if(\is_array($value)) {
-                $value = \implode(',', $value);
+                if(!\is_array(\current($value))) {
+                    $value = \implode(',', $value);
+                } else {
+                    $props['format'] = 'array';
+                }
             }
         }
         if(empty($props['format'])) {
@@ -917,6 +927,45 @@ class KadamApi
     }
 
     /**
+     * get ages target
+     * @return array
+     * @throws \Exception
+     * @since 1.4.0
+     */
+    public function getAges(): array
+    {
+        $url = $this->_prepare_url('ads.targeting.ages.get', []);
+
+        return $this->_execute_request($url)['response'] ?? [];
+    }
+
+    /**
+     * get browsers target
+     * @return array
+     * @throws \Exception
+     * @since 1.4.0
+     */
+    public function getBrowsers(): array
+    {
+        $url = $this->_prepare_url('ads.targeting.browsers.get', []);
+
+        return $this->_execute_request($url)['response'] ?? [];
+    }
+
+    /**
+     * get platforms target
+     * @return array
+     * @throws \Exception
+     * @since 1.4.0
+     */
+    public function getPlatforms(): array
+    {
+        $url = $this->_prepare_url('ads.targeting.platforms.get', []);
+
+        return $this->_execute_request($url)['response'] ?? [];
+    }
+
+    /**
      * Get languages target
      * @param array $params
      * @return array
@@ -932,7 +981,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.langs.get', $data);
 
-        return $this->_execute_request($url);
+        return $this->_execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -951,7 +1000,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.devices.get', $data);
 
-        return $this->_execute_request($url);
+        return $this->_execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -970,7 +1019,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.countries.get', $data);
 
-        return $this->_execute_request($url);
+        return $this->_execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -989,7 +1038,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.regions.get', $data);
 
-        return $this->_execute_request($url);
+        return $this->_execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1008,6 +1057,6 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.cities.get', $data);
 
-        return $this->_execute_request($url);
+        return $this->_execute_request($url)['response'] ?? [];
     }
 }
