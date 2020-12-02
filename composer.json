@@ -1,5 +1,5 @@
 {
-    "name": "kadam-official/php-sdk",
+    "name": "kadam/php-sdk",
     "type": "library",
     "version": "1.4.0-beta",
     "minimum-stability": "stable",
