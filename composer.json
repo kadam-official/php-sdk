@@ -1,6 +1,7 @@
 {
     "name": "kadam-official/php-sdk",
     "type": "library",
+    "version": "1.4.0-beta",
     "minimum-stability": "stable",
     "description": "PHP-SDK for kadam.net",
     "keywords": ["kadam", "kadam sdk", "sdk", "php"],
