@@ -1,0 +1,22 @@
+{
+    "name": "kadam-official/php-sdk",
+    "type": "library",
+    "minimum-stability": "stable",
+    "description": "PHP-SDK for kadam.net",
+    "keywords": ["kadam", "kadam sdk", "sdk", "php"],
+    "homepage": "https://kadam.net",
+    "authors": [
+        {
+            "name": "darkfriend",
+            "email": "hi@darkfriend.ru"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "classmap": [
+            "./KadamApi.php"
+        ]
+    }
+}
