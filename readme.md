@@ -6,6 +6,9 @@
 * Campaigns
     * [Create Campaign](#campaign-create)
     * [Update Campaign](#campaign-update)
+    * [Toggle Campaign State](#campaign-update-state)
+    * [Stats Campaign](#campaign-stats)
+    * [Campaign Placement Stats](#campaign-placement-stats)
     * Targeting
         * [Ages](#target-ages)
         * [Browsers](#target-browsers)
@@ -15,6 +18,18 @@
         * [Countries](#target-countries)
         * [Regions](#target-regions)
         * [Cities](#target-cities)
+* Advertisements
+    * [Create Advertisement](#adv-create)
+    * [Update Advertisement](#adv-update)
+    * [Archive Advertisements Enable/Disable](#adv-archive)
+    * [Update Advertisements State](#adv-state)
+* Creatives
+    * [Creative Stats](#creative-stats)
+* Images
+    * [Upload Image](#upload-image)
+    * 
+* Materials
+    * [Banner Sizes](#banner-sizes)
 
 ## <a name="install"></a> Installation
 
@@ -48,12 +63,12 @@ $id = $kadamApi->createCampaign([
     'link_url' => 'https://darkfriend.ru',
     'real_url' => 'https://darkfriend.ru',
     'age' => '1,2,4',
-    'sex' => 3,
+    'gender' => 3,
     'tags' => ['key1', 'key2', 'key3'],
     'geoExclude' => 0,
-    'langTarget' => [0,1,2,3,4,5,6,7,8,9,10],
-    'cityTarget' => [5819],
-    'countryTarget' => [
+    'langs' => [0,1,2,3,4,5,6,7,8,9,10],
+    'cities' => [5819],
+    'countries' => [
         187 => [
             'bid' => 0.2,
             'leadCost' => 0.8,
@@ -67,7 +82,7 @@ $id = $kadamApi->createCampaign([
             'leadCost' => 1,
         ],
     ],
-    'regionTarget' => [50360],
+    'regions' => [50360],
 ]);
 var_dump($id);
 ```
@@ -80,9 +95,9 @@ $campaignId = 1;
 $id = $kadamApi->updateCampaign($campaignId, [
     'name' => 'Ads campaign update',
     'geoExclude' => 0,
-    'langTarget' => [0,1,2,3,4,5,6,7,8,9,10],
-    'cityTarget' => [5819],
-    'countryTarget' => [
+    'langs' => [0,1,2,3,4,5,6,7,8,9,10],
+    'cities' => [5819],
+    'countries' => [
         187 => [
             'bid' => 0.2,
             'leadCost' => 0.8,
@@ -96,9 +111,36 @@ $id = $kadamApi->updateCampaign($campaignId, [
             'leadCost' => 1,
         ],
     ],
-    'regionTarget' => [50360],
+    'regions' => [50360],
 ]);
 var_dump($id);
+```
+
+## <a name="campaign-stats"></a> Stats Campaign
+
+```php
+$campaignId = [1];
+/** @var \kadam\KadamApi $kadamApi */
+$stats = $kadamApi->getCampaignStats(
+    $campaignId,
+    ['date','campaign'],
+    '2020-01-01',
+    '2020-02-01'
+);
+var_dump($stats);
+```
+
+## <a name="campaign-placement-stats"></a> Campaign Placement Stats
+
+```php
+$campaignId = [1];
+/** @var \kadam\KadamApi $kadamApi */
+$stats = $kadamApi->getCampaignPlacementStats(
+    $campaignId,
+    '2020-01-01',
+    '2020-02-01'
+);
+var_dump($stats);
 ```
 
 
@@ -340,4 +382,112 @@ array(2) {
     ....
   }
 }
+```
+
+
+## <a name="adv-create"></a> Create Advertisement
+
+```php
+$campaignId = 1;
+/** @var \kadam\KadamApi $kadamApi */
+$id = $kadamApi->createAdvertisement(
+    $campaignId,
+    10,
+    'title ads',
+    'text ads',
+    'http://darkfriend.ru'
+);
+var_dump($id);
+```
+
+## <a name="adv-update"></a> Update Advertisement
+
+```php
+$materialId = 1;
+/** @var \kadam\KadamApi $kadamApi */
+$id = $kadamApi->updateAdvertisement(
+    $materialId,
+    60,
+    'title ads',
+    'text ads',
+    'http://darkfriend.ru'
+);
+var_dump($id);
+```
+
+## <a name="adv-archive"></a> Archive Advertisements Enable/Disable
+
+```php
+$materialId = [1];
+/** @var \kadam\KadamApi $kadamApi */
+$result = $kadamApi->archiveAdvertisements($materialId);
+var_dump($result);
+```
+
+## <a name="adv-state"></a> Update Advertisements State
+
+```php
+$materialId = 1;
+/** @var \kadam\KadamApi $kadamApi */
+$id = $kadamApi->toggleAdvertisementState(
+    $materialId,
+    10
+);
+var_dump($id);
+```
+
+## <a name="banner-sizes"></a> Banner Sizes
+
+```php
+/** @var \kadam\KadamApi $kadamApi */
+$sizes = $kadamApi->getBannerSizes();
+var_dump($sizes);
+```
+
+### result
+```
+array(2) {
+  ["count"]=>int
+  ["items"]=>
+  array {
+    [0]=>
+    array(2) {
+      ["id"] => int
+      ["title"] => string
+    }
+    [1]=>
+    array(2) {
+      ["id"]=>int
+      ["title"]=>string
+    }
+    ....
+  }
+}
+```
+
+## <a name="creative-stats"></a> Creative Stats
+
+```php
+$campaignIds = [1];
+$creativeIds = [1];
+/** @var \kadam\KadamApi $kadamApi */
+$stats = $kadamApi->getCreativeStats(
+    $campaignIds,
+    $creativeIds,
+    ['date', 'creative'],
+    '2020-01-01',
+    '2020-02-01'
+);
+var_dump($stats);
+```
+
+## <a name="creative-stats"></a> Upload Image
+
+```php
+$url = 'http://site.ru/image.jpg';
+$adType = 10;
+$creativeIds = [1];
+/** @var \kadam\KadamApi $kadamApi */
+$image = $kadamApi->uploadImage($url,$adType);
+var_dump($image);
 ```
