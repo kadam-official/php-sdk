@@ -15,7 +15,7 @@ $campaignId = 1;
 
 $id = $kadamApi->updateCampaign($campaignId, [
     'name' => 'Ads campaign update',
-    'geoExclude' => 0,
+    'geoExclude' => 1,
     'langTarget' => [0,1,2,3,4,5,6,7,8,9,10],
     'cityTarget' => [5819],
     'countryTarget' => [
