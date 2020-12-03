@@ -92,11 +92,12 @@ class KadamApi
      * @param $action_and_method
      * @param array $params
      * @param bool $signature
+     * @param bool $toString
      * @return mixed
      */
-    private function _prepare_url($action_and_method, array $params, $signature = true)
+    private function _prepare_url($action_and_method, array $params, $signature = true, $toString=true)
     {
-        $params_string = $this->_process_params($params, $signature);
+        $params_string = $this->_process_params($params, $signature, $toString);
         $pattern = [
             '/%action%\.%method%/',
             '/%params%/'
@@ -113,9 +114,10 @@ class KadamApi
      * sort params
      * @param array $params
      * @param bool $signature
-     * @return string
+     * @param bool $toString
+     * @return string|array
      */
-    private function _process_params(array $params, $signature = true)
+    private function _process_params(array $params, $signature = true, $toString=true)
     {
         // В каждом запросе обязательно должен быть идентификатор прложения
         $params = \array_merge(
@@ -137,9 +139,14 @@ class KadamApi
         // Параметры в виде строки
         $params_string = \implode('&', $url_params);
         // Если требуется сигнатура - дополняем строку параметров сигнатурой от строки параметров
-        $params_string .= $this->_prepare_signature($params_string, $signature);
 
-        return $params_string;
+        if($toString) {
+            $params_string .= $this->_prepare_signature($params_string, $signature);
+            return $params_string;
+        } else {
+            $url_params['signature'] = $this->_prepare_signature($params_string, $signature);
+            return $url_params;
+        }
     }
 
     /**
@@ -330,7 +337,7 @@ class KadamApi
         $url = $this->_prepare_url('ads.materials.delete', $urlFilter);
         $response = $this->_execute_request($url);
         // get response items
-        return $response['response']['items'];
+        return $response['response']['items'] ?? [];
     }
 
 
@@ -518,11 +525,11 @@ class KadamApi
     /**
      * enable/disable material state
      * @param $materialID
-     * @param $state
+     * @param int $state
      * @return array|mixed
      * @throws \Exception
      */
-    public function toggleAdvertisementState($materialID, $state)
+    public function toggleAdvertisementState($materialID, int $state)
     {
         $material_data = [
             'material_id' => $materialID,
@@ -553,14 +560,14 @@ class KadamApi
      * @return array|mixed
      * @throws \Exception
      */
-    public function archiveAdvertisements($ids = array())
+    public function archiveAdvertisements(array $ids = [])
     {
         if (empty($ids)) return [];
 
         $url = $this->_prepare_url(
             'ads.materials.delete', [
-            'ids' => \implode(',', $ids)
-        ]
+                'ids' => \implode(',', $ids)
+            ]
         );
 
         $result = $this->_execute_request($url);
@@ -622,22 +629,26 @@ class KadamApi
 
     /**
      * upload image to storage server
-     * @param $link
-     * @param $type
+     * @param string $link
+     * @param int $type
      * @return array|mixed
      * @throws \Exception
      */
-    public function uploadImage($link, $type)
+    public function uploadImage($link, int $type)
     {
         // create post data
         $finfo = \finfo_open(\FILEINFO_MIME_TYPE);
         $finfo = \finfo_file($finfo, $link);
-        $cFile = new CURLFile($link, $finfo, \basename($link));
-        $post = array("file" => $cFile, 'ad_format' => $type, 'app_id' => $this->appID);
+        $cFile = new \CURLFile($link, $finfo, \basename($link));
+        $post = [
+            "file" => $cFile,
+            'ad_format' => $type,
+            'app_id' => $this->appID,
+        ];
 
-        $ignoreParams = array('file');
+        $ignoreParams = ['file'];
         \ksort($post);
-        $result = array();
+        $result = [];
         foreach ($post as $key => $value) {
             if (false == \in_array($key, $ignoreParams)) {
                 $result[] = $key . '=' . \urlencode($value);
@@ -662,21 +673,21 @@ class KadamApi
 
     /**
      * create material (teaser)
-     * @param $campaignID
-     * @param $type
-     * @param $title
-     * @param $text
-     * @param $linkUrl
-     * @param $linkMedia
-     * @param $pauseAfterModerate
-     * @param $size
+     * @param int $campaignID
+     * @param int $type type from campaign (10 - teaser, 20 - banner, 30 - push, 40 - clickunder, 70 - video)
+     * @param string $title
+     * @param string $text
+     * @param string $linkUrl
+     * @param string $linkMedia
+     * @param int $pauseAfterModerate set pause after moderation 1|0
+     * @param int $size
      * @param int $status
      * @param string $linkUrlRect
      * @param int $size_avail
      * @return array|mixed
      * @throws \Exception
      */
-    public function createAdvertisement($campaignID, $type, $title, $text, $linkUrl, $linkMedia, $pauseAfterModerate, $size, $status = 0, $linkUrlRect = '', $size_avail = 1)
+    public function createAdvertisement(int $campaignID, int $type, string $title, string $text, string $linkUrl, string $linkMedia='', int $pauseAfterModerate = 0, int $size = null, int $status = 0, string $linkUrlRect = '', int $size_avail = 1)
     {
         if (!(int)$campaignID) {
             throw new \Exception('The campaign can not be empty');
@@ -684,7 +695,7 @@ class KadamApi
 
         $data = [
             'client_id' => $this->appID,
-            'campaign_id' => (int)$campaignID,
+            'campaign_id' => $campaignID,
             'title' => $title,
             'text' => $text,
             'status' => $status,
@@ -709,15 +720,15 @@ class KadamApi
         }
 
         if ($type == 70) {
-            $data['length_video'] = (int)$size;
+            $data['length_video'] = $size;
         } elseif ($size) {
             $data['size'] = $size;
         }
 
         $url = $this->_prepare_url(
             'ads.materials.put', [
-            'data' => \json_encode($data)
-        ]
+                'data' => \json_encode($data)
+            ]
         );
 
         $urlContents = \explode('?', $url);
@@ -732,14 +743,14 @@ class KadamApi
 
     /**
      * update material (teaser)
-     * @param $materialID
-     * @param $type
-     * @param $title
-     * @param $text
-     * @param $linkUrl
-     * @param $linkMedia
+     * @param int $materialID
+     * @param int $type
+     * @param string $title
+     * @param string $text
+     * @param string $linkUrl
+     * @param string $linkMedia
      * @param int $pauseAfterModerate
-     * @param $size
+     * @param int $size
      * @param null $status
      * @param null $linkUrlRect
      * @param null $size_avail
@@ -757,7 +768,9 @@ class KadamApi
             'material_id' => \intval($materialID),
         ];
 
-        if ($pauseAfterModerate) $data['pause_after_moderate'] = $pauseAfterModerate;
+        if ($pauseAfterModerate){
+            $data['pause_after_moderate'] = $pauseAfterModerate;
+        }
 
         if (!empty($title)) $data['title'] = $title;
         if (!empty($text)) $data['text'] = $text;
@@ -793,8 +806,8 @@ class KadamApi
 
         $url = $this->_prepare_url(
             'ads.materials.update', [
-            'data' => \json_encode($data)
-        ]
+                'data' => \json_encode($data)
+            ]
         );
 
         $urlContents = \explode("?", $url);
@@ -924,6 +937,19 @@ class KadamApi
         $url = $this->_prepare_url('ads.stats.campaign.placement.put', $data);
 
         return $this->_execute_request($url);
+    }
+
+    /**
+     * get sizes id for banner advertise
+     * @return array
+     * @throws \Exception
+     * @since 1.4.0
+     */
+    public function getBannerSizes(): array
+    {
+        $url = $this->_prepare_url('ads.materials.banner.sizes.get', []);
+
+        return $this->_execute_request($url)['response'] ?? [];
     }
 
     /**
