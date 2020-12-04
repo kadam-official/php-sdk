@@ -27,9 +27,9 @@
     * [Creative Stats](#creative-stats)
 * Images
     * [Upload Image](#upload-image)
-    * 
 * Materials
     * [Banner Sizes](#banner-sizes)
+* [Examples](./examples)
 
 ## <a name="install"></a> Installation
 
@@ -485,9 +485,16 @@ var_dump($stats);
 
 ```php
 $url = 'http://site.ru/image.jpg';
+// or
+// $url = file_get_contents('http://site.ru/image.jpg');
+// or 
+// $url = file_get_contents(__DIR__.'/image.jpg');
 $adType = 10;
-$creativeIds = [1];
 /** @var \kadam\KadamApi $kadamApi */
 $image = $kadamApi->uploadImage($url,$adType);
 var_dump($image);
+```
+### result
+```
+https//kadam.net/path-to-file/file.extension
 ```
