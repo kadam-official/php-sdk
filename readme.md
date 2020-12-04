@@ -30,6 +30,7 @@
 * Materials
     * [Banner Sizes](#banner-sizes)
 * [Examples](./examples)
+* [Changelog](./CHANGELOG.md)
 
 ## <a name="install"></a> Installation
 
