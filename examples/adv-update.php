@@ -21,5 +21,3 @@ $id = $kadamApi->updateAdvertisement(
     'http://darkfriend.ru'
 );
 var_dump($id);
-
-var_dump($id);

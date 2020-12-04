@@ -15,6 +15,8 @@ $kadamApi = new \kadam\KadamApi($config['appId'], $config['secretKey']);
 $url = 'https://darkfriend.ru/img/darkfriend.jpg';
 // or
 //$url = file_get_contents('https://darkfriend.ru/img/darkfriend.jpg');
+// or
+//$url = file_get_contents(__DIR__.'/image.jpg');
 $adType = 10;
 
 /** @var \kadam\KadamApi $kadamApi */
