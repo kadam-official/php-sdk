@@ -13,10 +13,11 @@ $config = include __DIR__.'/config.php';
 $kadamApi = new \kadam\KadamApi($config['appId'], $config['secretKey']);
 
 $url = 'https://darkfriend.ru/img/darkfriend.jpg';
-//$url = __DIR__.'/darkfriend.jpg';
-$adType = 20;
+// or
+//$url = file_get_contents('https://darkfriend.ru/img/darkfriend.jpg');
+$adType = 10;
 
 /** @var \kadam\KadamApi $kadamApi */
-$image = $kadamApi->uploadImage($url,$adType);
+$image = $kadamApi->uploadImage($url, $adType);
 
 var_dump($image);
