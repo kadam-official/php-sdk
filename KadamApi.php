@@ -629,43 +629,30 @@ class KadamApi
 
     /**
      * upload image to storage server
-     * @param string $link
-     * @param int $type
-     * @return array|mixed
+     * @param string $link url to file or file content
+     * @param int $type 10 - teaser, 20 - banner, 30 - push, 40 - clickunder, 70 - video
+     * @return string
      * @throws \Exception
      */
-    public function uploadImage($link, int $type)
+    public function uploadImage(string $link, int $type): string
     {
         // create post data
-        $finfo = \finfo_open(\FILEINFO_MIME_TYPE);
-        $finfo = \finfo_file($finfo, $link);
-        $cFile = new \CURLFile($link, $finfo, \basename($link));
         $post = [
-            "file" => $cFile,
+            "file" => $link,
             'ad_format' => $type,
-            'app_id' => $this->appID,
         ];
 
-        $ignoreParams = ['file'];
-        \ksort($post);
-        $result = [];
-        foreach ($post as $key => $value) {
-            if (false == \in_array($key, $ignoreParams)) {
-                $result[] = $key . '=' . \urlencode($value);
-            }
-        }
-        $result = \implode('&', $result);
-        $signature = \md5($result . $this->token);
+        $url = $this->_prepare_url('data.upload.media', $post);
 
-        // prepare url
-        $targetUrl = \str_replace("%action%.%method%?%params%", 'data.upload.media?signature=' . $signature, static::API_URL);
-
-        // send request
-        $result = $this->_execute_request($targetUrl, $post);
+        $urlContents = \explode("?", $url);
+        $result = $this->_execute_request($urlContents[0], $urlContents[1]);
 
         // error upload image
         if (!empty($result['error'])) {
             throw new \Exception($result['error']['msg']);
+        }
+        if (empty($result['image'])) {
+            throw new \Exception('Error upload image');
         }
 
         return $result['image'];
