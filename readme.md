@@ -84,6 +84,8 @@ $id = $kadamApi->createCampaign([
         ],
     ],
     'regions' => [50360],
+//    'black_list' => ['123', '456'], // if need black list
+//    'white_list' => ['321', '654'], // if need  white list
 ]);
 var_dump($id);
 ```
@@ -113,6 +115,8 @@ $id = $kadamApi->updateCampaign($campaignId, [
         ],
     ],
     'regions' => [50360],
+//    'black_list' => ['123', '456'], // if need black list
+//    'white_list' => ['321', '654'], // if need  white list
 ]);
 var_dump($id);
 ```

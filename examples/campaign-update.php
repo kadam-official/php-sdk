@@ -33,6 +33,8 @@ $id = $kadamApi->updateCampaign($campaignId, [
         ],
     ],
     'regionTarget' => [50360],
+//    'black_list' => ['123', '456'], // black list
+//    'white_list' => ['321', '654'], // white list
 ]);
 
 var_dump($id);
