@@ -1,9 +1,9 @@
 # Version 1.4.2
 
-* deprecated categories stakes for `ads.materials.put `and `ads.materials.post`
+* deprecate categories stakes for methods `ads.materials.put `and `ads.materials.post`
 * added support parameter `bids` for stakes in `createMaterial `and `updateMaterial` (also in `createAdvertisement` and `updateAdvertisement`)
-* added deprecated flag for method `createAdvertisement`, use `createMaterial`
-* added deprecated flag for method `updateAdvertisement` use `updateMaterial`
+* added deprecate flag for method `createAdvertisement`, use `createMaterial`
+* added deprecate flag for method `updateAdvertisement` use `updateMaterial`
 * added new method `createMaterial`
 * added new method `updateMaterial`
 
