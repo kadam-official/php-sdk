@@ -19,8 +19,8 @@
         * [Regions](#target-regions)
         * [Cities](#target-cities)
 * Advertisements
-    * [Create Advertisement](#adv-create)
-    * [Update Advertisement](#adv-update)
+    * [Create Advertisement (ex.Teaser)](#adv-create)
+    * [Update Advertisement (ex.Teaser)](#adv-update)
     * [Archive Advertisements Enable/Disable](#adv-archive)
     * [Update Advertisements State](#adv-state)
 * Creatives
@@ -389,35 +389,50 @@ array(2) {
 }
 ```
 
-
-## <a name="adv-create"></a> Create Advertisement
+## <a name="adv-create"></a> Create Teaser
 
 ```php
 $campaignId = 1;
+$link = 'https://darkfriend.ru/img/darkfriend.jpg';
+
 /** @var \kadam\KadamApi $kadamApi */
-$id = $kadamApi->createAdvertisement(
-    $campaignId,
-    10,
-    'title ads',
-    'text ads',
-    'http://darkfriend.ru'
-);
+$id = $kadamApi->createMaterial($campaignId, 10, [
+    'title' => 'Тестовый тизер',
+    'link_url' => 'https://darkfriend.ru',
+    'linkMedia' => $link,
+    'linkMediaRect' => $link,
+    'bids' => [
+        187 => [
+            'bid' => 0.2,
+        ],
+        83 => [
+            'bid' => 0.5,
+        ],
+    ],
+//    'categories' => [1,2,3],
+]);
 var_dump($id);
 ```
 
-## <a name="adv-update"></a> Update Advertisement
+## <a name="adv-update"></a> Update Teaser
 
 ```php
 $materialId = 1;
+
 /** @var \kadam\KadamApi $kadamApi */
-$id = $kadamApi->updateAdvertisement(
-    $materialId,
-    60,
-    'title ads',
-    'text ads',
-    'http://darkfriend.ru'
-);
-var_dump($id);
+$result = $kadamApi->updateMaterial($materialId, [
+    'title' => 'Тестовый тизер',
+    'bids' => [
+        187 => [
+            'bid' => 0.3,
+        ],
+        83 => [
+            'bid' => 0.4,
+        ],
+    ],
+//    'categories' => [1,2,3],
+]);
+var_dump($result);
 ```
 
 ## <a name="adv-archive"></a> Archive Advertisements Enable/Disable
