@@ -3,10 +3,12 @@
 namespace kadam;
 
 
+use darkfriend\helpers\ArrayHelper;
+
 /**
  * Class KadamApi
  *
- * @version 1.4.0-beta
+ * @version 1.4.2
  * min php7.0
  */
 class KadamApi
@@ -671,33 +673,64 @@ class KadamApi
      * @param int $status
      * @param string $linkUrlRect
      * @param int $size_avail
+     * @param array $bids
      * @return array|mixed
      * @throws \Exception
+     * @deprecated
+     * @see createMaterial
      */
-    public function createAdvertisement(int $campaignID, int $type, string $title, string $text, string $linkUrl, string $linkMedia='', int $pauseAfterModerate = 0, int $size = null, int $status = 0, string $linkUrlRect = '', int $size_avail = 1)
+    public function createAdvertisement(int $campaignID, int $type, string $title, string $text, string $linkUrl, string $linkMedia='', int $pauseAfterModerate = 0, int $size = null, int $status = 0, string $linkUrlRect = '', int $size_avail = 1, array $bids = []): int
+    {
+        return $this->createMaterial($campaignID, $type, [
+            'title' => $title,
+            'text' => $text,
+            'status' => $status ?? 0,
+            'link_url' => $linkUrl,
+            'pause_after_moderate' => $pauseAfterModerate,
+            'size_avail' => $size_avail,
+            'linkMedia' => $linkMedia,
+            'linkMediaRect' => $linkUrlRect,
+            'size' => $size,
+            'bids' => $bids,
+        ]);
+    }
+
+    /**
+     * Create material (teaser|banner|push|clickunder|video)
+     * @param int $campaignID
+     * @param int $type type from campaign (10 - teaser, 20 - banner, 30 - push, 40 - clickunder, 70 - video)
+     * @param array $fields
+     * @return int
+     * @throws \Exception
+     * @since 1.4.2
+     */
+    public function createMaterial(int $campaignID, int $type, array $fields): int
     {
         if (!(int)$campaignID) {
             throw new \Exception('The campaign can not be empty');
         }
 
+        MaterialValidate::onCreate($type, $fields);
+
         $data = [
             'client_id' => $this->appID,
             'campaign_id' => $campaignID,
-            'title' => $title,
-            'text' => $text,
-            'status' => $status,
-            'link_url' => $linkUrl,
-            'pause_after_moderate' => $pauseAfterModerate,
-            'size_avail' => $size_avail,
+            'type' => $type,
+            'title' => $fields['title'],
+            'text' => $fields['text'],
+            'status' => $fields['status'] ?? 0,
+            'link_url' => $fields['linkUrl'],
+            'pause_after_moderate' => $fields['pauseAfterModerate'] ?? 0,
+            'size_avail' => $fields['sizeAvail'] ?? 1,
         ];
 
-        if (!empty($linkMedia)) {
+        if (!empty($fields['linkMedia'])) {
             // upload media
-            $data['link_media'] = $link = $this->uploadImage($linkMedia, $type);
+            $data['link_media'] = $link = $this->uploadImage($fields['linkMedia'], $type);
 
             // upload rectangle media
-            if (!empty($linkUrlRect)) {
-                $data['link_media_rect'] = $this->uploadImage($linkUrlRect, $type);
+            if (!empty($fields['linkMediaRect'])) {
+                $data['link_media_rect'] = $this->uploadImage($fields['linkMediaRect'], $type);
                 $data['size_avail'] = 3;
             }
         }
@@ -707,9 +740,35 @@ class KadamApi
         }
 
         if ($type == 70) {
-            $data['length_video'] = $size;
-        } elseif ($size) {
-            $data['size'] = $size;
+            $data['length_video'] = $fields['size'];
+        } elseif (!empty($fields['size'])) {
+            $data['size'] = $fields['size'];
+        }
+
+        if(!empty($fields['bids'])) {
+            $data['bids'] = $fields['bids'];
+        }
+
+        $fields = ArrayHelper::removeByKey($fields, [
+            'client_id',
+            'campaign_id',
+            'status',
+            'type',
+            'title',
+            'text',
+            'linkUrl',
+            'linkMedia',
+            'pauseAfterModerate',
+            'size',
+            'linkMediaRect',
+            'sizeAvail',
+            'bids',
+        ]);
+
+        if($fields) {
+            foreach ($fields as $kField => $vField) {
+                $data[$kField] = $vField;
+            }
         }
 
         $url = $this->_prepare_url(
@@ -725,11 +784,11 @@ class KadamApi
             throw new \Exception('Error create advertisement');
         }
 
-        return $result[0]['material_id'];
+        return (int) $result[0]['material_id'];
     }
 
     /**
-     * update material (teaser)
+     * update material (teaser|banner|push|clickunder|video)
      * @param int $materialID
      * @param int $type
      * @param string $title
@@ -741,13 +800,40 @@ class KadamApi
      * @param null $status
      * @param null $linkUrlRect
      * @param null $size_avail
+     * @param array $bids
      * @return array|mixed
      * @throws \Exception
+     * @deprecated
+     * @see updateMaterial
      */
-    public function updateAdvertisement($materialID, $status = null, $type = null, $title = null, $text = null, $linkUrl = null, $linkMedia = null, $pauseAfterModerate = 0, $size = null, $linkUrlRect = null, $size_avail = null)
+    public function updateAdvertisement($materialID, $status = null, $type = null, $title = null, $text = null, $linkUrl = null, $linkMedia = null, $pauseAfterModerate = 0, $size = null, $linkUrlRect = null, $size_avail = null, array $bids = [])
     {
+        return $this->updateMaterial((int) $materialID, [
+            'status' => $status,
+            'type' => $type,
+            'title' => $title,
+            'text' => $text,
+            'linkUrl' => $linkUrl,
+            'linkMedia' => $linkMedia,
+            'pauseAfterModerate' => $pauseAfterModerate,
+            'size' => $size,
+            'linkUrlRect' => $linkUrlRect,
+            'sizeAvail' => $size_avail,
+            'bids' => $bids,
+        ]);
+    }
 
-        if (!\intval($materialID)) {
+    /**
+     * Update material (teaser|banner|push|clickunder|video)
+     * @param int $materialID
+     * @param array $fields
+     * @return mixed
+     * @throws \Exception
+     * @since 1.4.2
+     */
+    public function updateMaterial(int $materialID, array $fields = [])
+    {
+        if (!$materialID) {
             throw new \Exception("The materialID can not be empty");
         }
 
@@ -755,41 +841,65 @@ class KadamApi
             'material_id' => \intval($materialID),
         ];
 
-        if ($pauseAfterModerate){
-            $data['pause_after_moderate'] = $pauseAfterModerate;
+        if ($fields['pauseAfterModerate']){
+            $data['pause_after_moderate'] = $fields['pauseAfterModerate'];
         }
 
-        if (!empty($title)) $data['title'] = $title;
-        if (!empty($text)) $data['text'] = $text;
-        if (!empty($size_avail)) $data['size_avail'] = $size_avail;
+        if (!empty($fields['title'])) $data['title'] = $fields['title'];
+        if (!empty($fields['text'])) $data['text'] = $fields['text'];
+        if (!empty($fields['sizeAvail'])) $data['size_avail'] = $fields['sizeAvail'];
 
         // для видео
-        if ($type && $type == 70 && empty($text)) $data['text'] = $title;
+        if (!empty($fields['type']) && $fields['type'] == 70 && empty($fields['text'])) {
+            $data['text'] = $fields['title'];
+        }
 
-        if (!empty($linkUrl)) $data['link_url'] = $linkUrl;
-        if (!empty($linkMedia)) {
+        if (!empty($fields['linkUrl'])) $data['link_url'] = $fields['linkUrl'];
+        if (!empty($fields['linkMedia'])) {
             // upload media
-            $link = $this->uploadImage($linkMedia, $type);
-            $data['link_media'] = $link;
+            $data['link_media'] = $this->uploadImage($fields['linkMedia'], $fields['type']);
 
             // upload rectangle media
-            if (!empty($linkUrlRect)) {
-                $data['link_media_rect'] = $this->uploadImage($linkUrlRect, $type);
+            if (!empty($fields['linkUrlRect'])) {
+                $data['link_media_rect'] = $this->uploadImage($fields['linkUrlRect'], $fields['type']);
                 $data['size_avail'] = 3;
             }
         }
 
-        if ($type == 60) {
-            $data['target_domain'] = $data['link_url'];
+        if(!empty($fields['type'])) {
+            if ($fields['type'] == 60) {
+                $data['target_domain'] = $data['link_url'];
+            }
+
+            if ($fields['type'] == 70) {
+                $data['length_video'] = (int) $fields['size'] ?? 0;
+            } elseif (isset($fields['size'])) {
+                $data['size'] = (int) $fields['size'];
+            }
         }
 
-        if ($type == 70) {
-            $data['length_video'] = (int)$size;
-        } else {
-            if ($size) $data['size'] = $size;
+        if (!\is_null($fields['status'])) {
+            $data['status'] = $fields['status'];
         }
 
-        if (!\is_null($status)) $data['status'] = $status;
+        $fields = ArrayHelper::removeByKey($fields, [
+            'status',
+            'type',
+            'title',
+            'text',
+            'linkUrl',
+            'linkMedia',
+            'pauseAfterModerate',
+            'size',
+            'linkUrlRect',
+            'sizeAvail',
+        ]);
+
+        if($fields) {
+            foreach ($fields as $kField => $vField) {
+                $data[$kField] = $vField;
+            }
+        }
 
         $url = $this->_prepare_url(
             'ads.materials.update', [

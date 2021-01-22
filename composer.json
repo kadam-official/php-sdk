@@ -12,11 +12,13 @@
         }
     ],
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "darkfriend/php7-array": "^1.0"
     },
     "autoload": {
         "classmap": [
-            "./KadamApi.php"
+            "./KadamApi.php",
+            "./MaterialValidate.php"
         ]
     }
 }
