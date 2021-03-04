@@ -43,7 +43,7 @@ composer require kadam/php-sdk
 ### Step 2
 
 ```php
-require_once __DIR__.'vendor/autoload.php';
+require_once __DIR__.'/vendor/autoload.php';
 
 $appId = 10;
 $secretKey = 'you_secret_key';
