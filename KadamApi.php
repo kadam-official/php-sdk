@@ -1028,7 +1028,6 @@ class KadamApi
             'campaign_id' => $campaignId,
             'placement' => $placementId,
             'multiplier' => $multiplier,
-            'multiplierOld' => 0,
         ];
 
         $url = $this->_prepare_url('ads.stats.campaign.placement.put', $data);
