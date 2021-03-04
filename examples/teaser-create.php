@@ -19,8 +19,7 @@ $id = $kadamApi->createAdvertisement(
     10,
     'Тестовый тизер',
     'Текст для тестового тизера',
-    'https://darkfriend.ru',
-    __DIR__.'/darkfriend.jpg'
+    file_get_contents(__DIR__.'/darkfriend.jpg')
 );
 
 var_dump($id);

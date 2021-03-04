@@ -20,8 +20,7 @@ $id = $kadamApi->updateAdvertisement(
     10,
     'Тестовый тизер',
     'Текст для тестового тизера',
-    'https://darkfriend.ru',
-    __DIR__.'/darkfriend.jpg'
+    'https://darkfriend.ru'
 );
 
 var_dump($id);
