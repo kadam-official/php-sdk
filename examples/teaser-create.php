@@ -14,12 +14,13 @@ $kadamApi = new \kadam\KadamApi($config['appId'], $config['secretKey']);
 
 $campaignId = 1;
 
-$id = $kadamApi->createAdvertisement(
+$id = $kadamApi->createMaterial(
     $campaignId,
-    10,
-    'Тестовый тизер',
-    'Текст для тестового тизера',
-    file_get_contents(__DIR__.'/darkfriend.jpg')
+    10, // teaser
+    [
+        'title' => 'Тестовый тизер',
+        'linkMedia' => file_get_contents(__DIR__.'/darkfriend.jpg'),
+    ]
 );
 
 var_dump($id);

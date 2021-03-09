@@ -12,15 +12,14 @@ $config = include __DIR__ . '/config.php';
 
 $kadamApi = new \kadam\KadamApi($config['appId'], $config['secretKey']);
 
-$campaignId = 1;
 $materialId = 1;
 
-$id = $kadamApi->updateAdvertisement(
+$id = $kadamApi->updateMaterial(
     $materialId,
-    10,
-    'Тестовый тизер',
-    'Текст для тестового тизера',
-    'https://darkfriend.ru'
+    [
+        'title' => 'Обновленный тестовый тизер',
+        'linkUrl' => 'https://darkfriend.ru',
+    ]
 );
 
 var_dump($id);
