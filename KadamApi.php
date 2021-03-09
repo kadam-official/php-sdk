@@ -679,7 +679,7 @@ class KadamApi
      * @deprecated
      * @see createMaterial
      */
-    public function createAdvertisement(int $campaignID, int $type, string $title, string $text, string $linkUrl, string $linkMedia='', int $pauseAfterModerate = 0, int $size = null, int $status = 0, string $linkUrlRect = '', int $size_avail = 1, array $bids = []): int
+    public function createAdvertisement(int $campaignID, int $type, string $title, string $text = '', string $linkUrl = '', string $linkMedia='', int $pauseAfterModerate = 0, int $size = null, int $status = 0, string $linkUrlRect = '', int $size_avail = 1, array $bids = []): int
     {
         return $this->createMaterial($campaignID, $type, [
             'title' => $title,
@@ -717,12 +717,15 @@ class KadamApi
             'campaign_id' => $campaignID,
             'type' => $type,
             'title' => $fields['title'],
-            'text' => $fields['text'],
             'status' => $fields['status'] ?? 0,
             'link_url' => $fields['linkUrl'],
             'pause_after_moderate' => $fields['pauseAfterModerate'] ?? 0,
             'size_avail' => $fields['sizeAvail'] ?? 1,
         ];
+
+        if(isset($fields['text'])) {
+            $data['text'] = $fields['text'];
+        }
 
         if (!empty($fields['linkMedia'])) {
             // upload media

@@ -15,7 +15,6 @@ class MaterialValidate
     {
         $requireFields = [
             'title',
-            'text',
             'linkUrl',
         ];
 
@@ -23,6 +22,10 @@ class MaterialValidate
             if(empty($fields[$field])) {
                 throw new \Exception("The field \"{$field}\" can not be empty");
             }
+        }
+
+        if($type === 30 && empty($fields['text'])) {
+            throw new \Exception("The field \"text\" can not be empty");
         }
 
         if ($type == 70 && empty($fields['size'])) {
