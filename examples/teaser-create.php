@@ -18,8 +18,8 @@ $id = $kadamApi->createMaterial(
     $campaignId,
     10, // teaser
     [
-        'title' => 'Тестовый тизер',
-        'linkMedia' => file_get_contents(__DIR__.'/darkfriend.jpg'),
+        'title' => 'Test teaser',
+        'linkMedia' => file_get_contents('https://darkfriend.ru/img/darkfriend.jpg'),
     ]
 );
 

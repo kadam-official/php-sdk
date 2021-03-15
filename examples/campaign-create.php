@@ -13,8 +13,6 @@ $config = include __DIR__.'/config.php';
 $kadamApi = new \kadam\KadamApi($config['appId'], $config['secretKey']);
 
 $id = $kadamApi->createCampaign([
-    'app_id' => $appId,
-    'client_id' => $appId,
     'type' => 10, // teaser
     'cpType' => 0, // cpc
 //    'cpaMode' => 10,

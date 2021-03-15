@@ -17,7 +17,7 @@ $materialId = 1;
 $id = $kadamApi->updateMaterial(
     $materialId,
     [
-        'title' => 'Обновленный тестовый тизер',
+        'title' => 'Update title teaser',
         'linkUrl' => 'https://darkfriend.ru',
     ]
 );

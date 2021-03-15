@@ -13,11 +13,12 @@ $config = include __DIR__.'/config.php';
 $kadamApi = new \kadam\KadamApi($config['appId'], $config['secretKey']);
 $materialId = 10;
 
-$id = $kadamApi->updateAdvertisement(
+$id = $kadamApi->updateMaterial(
     $materialId,
-    60,
-    'title ads',
-    'text ads',
-    'http://darkfriend.ru'
+    [
+        'title' => 'title ads',
+        'text' => 'text ads',
+        'linkUrl' => 'http://darkfriend.ru',
+    ]
 );
 var_dump($id);
