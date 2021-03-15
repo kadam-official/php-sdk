@@ -56,8 +56,6 @@ $kadamApi = new \kadam\KadamApi($appId, $secretKey);
 ```php
 /** @var \kadam\KadamApi $kadamApi */
 $id = $kadamApi->createCampaign([
-    'app_id' => $appId,
-    'client_id' => $appId,
     'ad_format' => 10, // teaser
     'cost_type' => 0, // cpc
     'name' => 'Ads campaign',
@@ -397,12 +395,10 @@ $link = 'https://darkfriend.ru/img/darkfriend.jpg';
 
 /** @var \kadam\KadamApi $kadamApi */
 $id = $kadamApi->createMaterial($campaignId, 10, [
-    'title' => 'Тестовый тизер',
-    'linkUrl' => 'https://darkfriend.ru',
-    'text' => 'Текст для тизера',
-    'linkMedia' => $link,
-    'linkMediaRect' => $link,
-    'sizeAvail' => 3,
+    'title' => 'Test teaser',
+    'linkUrl' => 'https://darkfriend.ru', // schema and host as in campaign
+    'linkMedia' => \file_get_contents($link),
+//    'linkMediaRect' => $linkRect, // rectangle picture
     'bids' => [
         187 => [
             'bid' => 0.2,
@@ -423,7 +419,7 @@ $materialId = 1;
 
 /** @var \kadam\KadamApi $kadamApi */
 $result = $kadamApi->updateMaterial($materialId, [
-    'title' => 'Тестовый тизер',
+    'title' => 'New Title for teaser',
     'bids' => [
         187 => [
             'bid' => 0.3,
