@@ -8,7 +8,7 @@ use darkfriend\helpers\ArrayHelper;
 /**
  * Class KadamApi
  *
- * @version 1.4.2
+ * @version 1.4.4
  * min php7.0
  */
 class KadamApi
@@ -91,7 +91,7 @@ class KadamApi
 
     /**
      * process and prepare request url
-     * @param $action_and_method
+     * @param mixed $action_and_method
      * @param array $params
      * @param bool $signature
      * @param bool $toString
@@ -152,12 +152,12 @@ class KadamApi
     }
 
     /**
-     * add signature param
+     * add signature param (private)
      * @param string $params_string
      * @param bool $signature
      * @return string
      */
-    private function _prepare_signature($params_string = '', $signature = true)
+    private function _prepare_signature(string $params_string = '', $signature = true)
     {
         return $signature ? '&signature=' . \md5($params_string . $this->token) : '';
     }
@@ -169,7 +169,7 @@ class KadamApi
      * @return array|mixed
      * @throws \Exception
      */
-    private function _execute_request($url, $post = false)
+    protected function execute_request(string $url, $post = false)
     {
         $curl = \curl_init();
         \curl_setopt($curl, \CURLOPT_URL, $url);
@@ -210,7 +210,7 @@ class KadamApi
     public function auth()
     {
         $auth_url = $this->_prepare_url('auth.token', ['secret_key' => $this->secret], false);
-        $auth = $this->_execute_request($auth_url);
+        $auth = $this->execute_request($auth_url);
         if (!isset($auth['access_token'])) {
             throw new \Exception('Access denied');
         }
@@ -269,7 +269,7 @@ class KadamApi
         }
 
         $url = $this->_prepare_url('ads.campaigns.get', $urlFilter);
-        $response = $this->_execute_request($url);
+        $response = $this->execute_request($url);
 
         // get response items
         return $response['response']['items'] ?? [];
@@ -317,7 +317,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.materials.get', $urlFilter);
 
-        $response = $this->_execute_request($url);
+        $response = $this->execute_request($url);
 
         // get response items
         return $response['response']['items'] ?? [];
@@ -337,7 +337,7 @@ class KadamApi
             'ids' => $mIds,
         ];
         $url = $this->_prepare_url('ads.materials.delete', $urlFilter);
-        $response = $this->_execute_request($url);
+        $response = $this->execute_request($url);
         // get response items
         return $response['response']['items'] ?? [];
     }
@@ -453,7 +453,7 @@ class KadamApi
         ]);
 
         $urlContents = \explode("?", $url);
-        $result = $this->_execute_request($urlContents[0], $urlContents[1]);
+        $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]) || !\intval($result[0])) {
             throw new \Exception("Error creating campaign: " . \json_encode($result));
@@ -513,7 +513,7 @@ class KadamApi
         ]
         );
 
-        $result = $this->_execute_request($url);
+        $result = $this->execute_request($url);
         if (empty($result[0]) || !\intval($result[0])) {
             throw new \Exception("Error in campaign $campaignID changing state");
         }
@@ -544,7 +544,7 @@ class KadamApi
         ]
         );
 
-        $result = $this->_execute_request($url);
+        $result = $this->execute_request($url);
 
         if (empty($result[0]['material_id']) || !\intval($result[0]['material_id'])) {
             throw new \Exception("Error in campaign $materialID changing state");
@@ -572,7 +572,7 @@ class KadamApi
             ]
         );
 
-        $result = $this->_execute_request($url);
+        $result = $this->execute_request($url);
 
         // проверяем ответ на наличие
         if (empty($result[0])) {
@@ -617,7 +617,7 @@ class KadamApi
         );
 
         $urlContents = \explode("?", $url);
-        $result = $this->_execute_request($urlContents[0], $urlContents[1]);
+        $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]) || !\intval($result[0])) {
             throw new \Exception("Error updating campaign");
@@ -647,7 +647,7 @@ class KadamApi
         $url = $this->_prepare_url('data.upload.media', $post);
 
         $urlContents = \explode("?", $url);
-        $result = $this->_execute_request($urlContents[0], $urlContents[1]);
+        $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         // error upload image
         if (!empty($result['error'])) {
@@ -781,7 +781,7 @@ class KadamApi
         );
 
         $urlContents = \explode('?', $url);
-        $result = $this->_execute_request($urlContents[0], $urlContents[1]);
+        $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]['material_id']) || !(int)$result[0]['material_id']) {
             throw new \Exception('Error create advertisement');
@@ -911,7 +911,7 @@ class KadamApi
         );
 
         $urlContents = \explode("?", $url);
-        $result = $this->_execute_request($urlContents[0], $urlContents[1]);
+        $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]['material_id']) || !\intval($result[0]['material_id'])) {
             throw new \Exception("Error update advertisement");
@@ -950,7 +950,7 @@ class KadamApi
         $url = $this->_prepare_url('ads.stats.creative.get', $urlFilter);
 
         // get response items
-        return $this->_execute_request($url);
+        return $this->execute_request($url);
     }
 
     /**
@@ -981,7 +981,7 @@ class KadamApi
         $url = $this->_prepare_url('ads.stats.campaign.get', $urlFilter);
 
         // get response items
-        return $this->_execute_request($url);
+        return $this->execute_request($url);
     }
 
     /**
@@ -1012,7 +1012,7 @@ class KadamApi
         $url = $this->_prepare_url('ads.stats.campaign.placement.get', $urlFilter);
 
         // get response items
-        return $this->_execute_request($url);
+        return $this->execute_request($url);
     }
 
     /**
@@ -1035,7 +1035,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.stats.campaign.placement.put', $data);
 
-        return $this->_execute_request($url);
+        return $this->execute_request($url);
     }
 
     /**
@@ -1048,7 +1048,7 @@ class KadamApi
     {
         $url = $this->_prepare_url('ads.materials.banner.sizes.get', []);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1061,7 +1061,7 @@ class KadamApi
     {
         $url = $this->_prepare_url('ads.targeting.ages.get', []);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1074,7 +1074,7 @@ class KadamApi
     {
         $url = $this->_prepare_url('ads.targeting.browsers.get', []);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1087,7 +1087,7 @@ class KadamApi
     {
         $url = $this->_prepare_url('ads.targeting.platforms.get', []);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1106,7 +1106,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.langs.get', $data);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1125,7 +1125,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.devices.get', $data);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1144,7 +1144,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.countries.get', $data);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1163,7 +1163,7 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.regions.get', $data);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 
     /**
@@ -1182,6 +1182,6 @@ class KadamApi
 
         $url = $this->_prepare_url('ads.targeting.cities.get', $data);
 
-        return $this->_execute_request($url)['response'] ?? [];
+        return $this->execute_request($url)['response'] ?? [];
     }
 }
