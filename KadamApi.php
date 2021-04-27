@@ -8,7 +8,7 @@ use darkfriend\helpers\ArrayHelper;
 /**
  * Class KadamApi
  *
- * @version 1.4.4
+ * @version 1.5.0
  * min php7.0
  */
 class KadamApi
@@ -1186,12 +1186,13 @@ class KadamApi
     }
 
     /**
-     * Get all regions by country
+     * Get all geo regions by country
      * @param int $countryId
      * @return array
      * @throws \Exception
+     * @since 1.5.0
      */
-    public function getRegionsByCountry(int $countryId): array
+    public function getGeoRegions(int $countryId): array
     {
         $data = [
             'country_id' => $countryId,
@@ -1203,11 +1204,12 @@ class KadamApi
     }
 
     /**
-     * Get all countries
+     * Get all geo countries
      * @return array
      * @throws \Exception
+     * @since 1.5.0
      */
-    public function getCountries(): array
+    public function getGeoCountries(): array
     {
         $url = $this->_prepare_url('data.geo.countries.get', []);
 
