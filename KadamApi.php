@@ -1184,4 +1184,33 @@ class KadamApi
 
         return $this->execute_request($url)['response'] ?? [];
     }
+
+    /**
+     * Get all regions by country
+     * @param int $countryId
+     * @return array
+     * @throws \Exception
+     */
+    public function getRegionsByCountry(int $countryId): array
+    {
+        $data = [
+            'country_id' => $countryId,
+        ];
+
+        $url = $this->_prepare_url('data.geo.regions.get', $data);
+
+        return $this->execute_request($url)['response'] ?? [];
+    }
+
+    /**
+     * Get all countries
+     * @return array
+     * @throws \Exception
+     */
+    public function getCountries(): array
+    {
+        $url = $this->_prepare_url('data.geo.countries.get', []);
+
+        return $this->execute_request($url)['response'] ?? [];
+    }
 }
