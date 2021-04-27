@@ -1057,7 +1057,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getAges(): array
+    public function getAgesTarget(): array
     {
         $url = $this->_prepare_url('ads.targeting.ages.get', []);
 
@@ -1070,7 +1070,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getBrowsers(): array
+    public function getBrowsersTarget(): array
     {
         $url = $this->_prepare_url('ads.targeting.browsers.get', []);
 
@@ -1083,7 +1083,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getPlatforms(): array
+    public function getPlatformsTarget(): array
     {
         $url = $this->_prepare_url('ads.targeting.platforms.get', []);
 
@@ -1097,7 +1097,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getLangs($params = []): array
+    public function getLangsTarget(array $params = []): array
     {
         $data = [
             'limit' => $params['limit'] ?? 500,
@@ -1116,7 +1116,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getDevices($params = []): array
+    public function getDevicesTarget(array $params = []): array
     {
         $data = [
             'limit' => $params['limit'] ?? 500,
@@ -1135,7 +1135,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getCountries($params = []): array
+    public function getCountriesTarget(array $params = []): array
     {
         $data = [
             'limit' => $params['limit'] ?? 500,
@@ -1154,7 +1154,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getRegions($params = []): array
+    public function getRegionsTarget(array $params = []): array
     {
         $data = [
             'limit' => $params['limit'] ?? 500,
@@ -1173,7 +1173,7 @@ class KadamApi
      * @throws \Exception
      * @since 1.4.0
      */
-    public function getCities($params = []): array
+    public function getCitiesTarget(array $params = []): array
     {
         $data = [
             'limit' => $params['limit'] ?? 500,
