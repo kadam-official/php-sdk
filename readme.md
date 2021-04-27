@@ -29,6 +29,9 @@
     * [Upload Image](#upload-image)
 * Materials
     * [Banner Sizes](#banner-sizes)
+* Data
+    * [Geo Countries](#geo-countries)
+    * [Geo Regions](#geo-regions)
 * [Examples](./examples)
 * [Changelog](./CHANGELOG.md)
 
@@ -151,7 +154,7 @@ var_dump($stats);
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$ages = $kadamApi->getAges();
+$ages = $kadamApi->getAgesTarget();
 var_dump($ages);
 ```
 
@@ -180,7 +183,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$browsers = $kadamApi->getBrowsers();
+$browsers = $kadamApi->getBrowsersTarget();
 var_dump($browsers);
 ```
 
@@ -209,7 +212,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$platforms = $kadamApi->getPlatforms();
+$platforms = $kadamApi->getPlatformsTarget();
 var_dump($platforms);
 ```
 
@@ -238,7 +241,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$langs = $kadamApi->getLangs();
+$langs = $kadamApi->getLangsTarget();
 var_dump($langs);
 ```
 
@@ -267,7 +270,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$devices = $kadamApi->getDevices();
+$devices = $kadamApi->getDevicesTarget();
 var_dump($devices);
 ```
 
@@ -296,7 +299,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$countries = $kadamApi->getCountries();
+$countries = $kadamApi->getCountriesTarget();
 var_dump($countries);
 ```
 
@@ -325,7 +328,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$regions = $kadamApi->getRegions();
+$regions = $kadamApi->getRegionsTarget();
 var_dump($regions);
 ```
 
@@ -358,7 +361,7 @@ array(2) {
 
 ```php
 /** @var \kadam\KadamApi $kadamApi */
-$cities = $kadamApi->getCities();
+$cities = $kadamApi->getCitiesTarget();
 var_dump($cities);
 ```
 
@@ -515,4 +518,21 @@ var_dump($image);
 ### result
 ```
 https//kadam.net/path-to-file/file.extension
+```
+
+## <a name="geo-countries"></a> Geo Countries
+
+```php
+/** @var \kadam\KadamApi $kadamApi */
+$countries = $kadamApi->getGeoCountries();
+var_dump($countries);
+```
+
+## <a name="geo-regions"></a> Geo Regions
+
+```php
+/** @var \kadam\KadamApi $kadamApi */
+$countryId = 2017370;
+$regions = $kadamApi->getGeoRegions($countryId);
+var_dump($regions);
 ```
