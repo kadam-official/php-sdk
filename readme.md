@@ -59,6 +59,8 @@ $kadamApi = new \kadam\KadamApi($appId, $secretKey);
 
 #### Variant 2
 ```php
+require_once __DIR__.'/vendor/autoload.php';
+
 $appId = 10;
 $token = 'you_bearer_token';
 
