@@ -5,6 +5,15 @@
 $kadamApi = new \kadam\KadamApi($appId, $token, \kadam\KadamApi::MODE_BEARER);
 ```
 
+# Version 1.4.2
+
+* deprecate categories stakes for methods `ads.materials.put `and `ads.materials.post`
+* added support parameter `bids` for stakes in `createMaterial `and `updateMaterial` (also in `createAdvertisement` and `updateAdvertisement`)
+* added deprecate flag for method `createAdvertisement`, use `createMaterial`
+* added deprecate flag for method `updateAdvertisement` use `updateMaterial`
+* added new method `createMaterial`
+* added new method `updateMaterial`
+
 # Version 1.4.0
 
 * [now available as a package `kadam/php-sdk` and new initialize](#initial)
