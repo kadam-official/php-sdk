@@ -4,6 +4,7 @@ namespace kadam;
 
 
 use darkfriend\helpers\ArrayHelper;
+use kadam\exceptions\ApiErrorException;
 
 /**
  * Class KadamApi
@@ -38,6 +39,11 @@ class KadamApi
     private $token;
 
     /**
+     * @var int
+     */
+    private $mode;
+
+    /**
      * map fields for campaign
      * @var string[]
      */
@@ -67,17 +73,53 @@ class KadamApi
 //    const API_URL = 'http://api.kadam-docker-old.sdev.pw/%action%.%method%?%params%';
     const API_URL = 'http://api.kadam.net/%action%.%method%?%params%';
 
+    /** @var int auth by signature */
+    const MODE_SIGNATURE = 1;
+    /** @var int auth by bearer token */
+    const MODE_BEARER = 2;
+
     /**
-     * CApi constructor.
+     * Api constructor.
      * @param int $appID
      * @param string $secret
-     * @throws \Exception
+     * @param int $mode
+     * @throws ApiErrorException
      */
-    public function __construct(int $appID, string $secret)
+    public function __construct(int $appID, string $secret, int $mode = self::MODE_SIGNATURE)
     {
         $this->appID = $this->clientID = $appID;
         $this->secret = $secret;
-        $this->auth();
+        $this->mode = $mode;
+        $this->init();
+    }
+
+    /**
+     * Initial
+     * @throws ApiErrorException
+     */
+    protected function init()
+    {
+        switch ($this->mode) {
+            case self::MODE_SIGNATURE:
+                $this->auth();
+                break;
+            case self::MODE_BEARER:
+                $this->token = $this->secret;
+                break;
+            default:
+                throw new ApiErrorException('Mode is not supported');
+        }
+    }
+
+    /**
+     * Set token
+     * @param string $token
+     * @return $this
+     */
+    public function setToken(string $token)
+    {
+        $this->token = $token;
+        return $this;
     }
 
     /**
@@ -97,7 +139,7 @@ class KadamApi
      * @param bool $toString
      * @return mixed
      */
-    private function _prepare_url($action_and_method, array $params, $signature = true, $toString=true)
+    private function _prepare_url($action_and_method, array $params, bool $signature = true, bool $toString=true)
     {
         $params_string = $this->_process_params($params, $signature, $toString);
         $pattern = [
@@ -119,7 +161,7 @@ class KadamApi
      * @param bool $toString
      * @return string|array
      */
-    private function _process_params(array $params, $signature = true, $toString=true)
+    private function _process_params(array $params, bool $signature = true, bool $toString=true)
     {
         // В каждом запросе обязательно должен быть идентификатор прложения
         $params = \array_merge(
@@ -128,6 +170,13 @@ class KadamApi
                 'client_id' => $this->clientID,
             ], $params
         );
+
+        if($this->mode===self::MODE_BEARER) {
+            if ($toString) {
+                return \http_build_query($params);
+            }
+            return $params;
+        }
 
         // Сортируем параметры
         \ksort($params);
@@ -167,7 +216,7 @@ class KadamApi
      * @param string $url
      * @param bool $post
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     protected function execute_request(string $url, $post = false)
     {
@@ -180,23 +229,28 @@ class KadamApi
             \curl_setopt($curl, \CURLOPT_POST, 1);
             \curl_setopt($curl, \CURLOPT_POSTFIELDS, $post);
         }
+        if($this->mode === self::MODE_BEARER) {
+            \curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                "Authorization: Bearer {$this->token}",
+            ]);
+        }
 
         $response = \curl_exec($curl);
 
         if (!$response) {
-            throw new \Exception('response == false');
+            throw new ApiErrorException('response == false');
         }
 
         $json_response = \json_decode($response, true);
 
         // invalid response
         if (!\is_array($json_response)) {
-            throw new \Exception("Response error (not JSON):\n" . \print_r($response, true));
+            throw new ApiErrorException("Response error (not JSON):\n" . \print_r($response, true));
         }
 
         // error in method
         if (isset($json_response[0]) and \is_array($json_response[0]) and isset($json_response[0]['error'])) {
-            throw new \Exception($json_response[0]['error']['msg'] . " (" . $url . ")");
+            throw new ApiErrorException($json_response[0]['error']['msg'] . " (" . $url . ")");
         }
 
         return $json_response;
@@ -205,14 +259,14 @@ class KadamApi
     /**
      * get auth token
      * @return $this
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function auth()
     {
         $auth_url = $this->_prepare_url('auth.token', ['secret_key' => $this->secret], false);
         $auth = $this->execute_request($auth_url);
         if (!isset($auth['access_token'])) {
-            throw new \Exception('Access denied');
+            throw new ApiErrorException('Access denied');
         }
         $this->token = $auth['access_token'];
         return $this;
@@ -223,7 +277,7 @@ class KadamApi
      * @param int $id
      * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function getCampaign(int $id, array $params=[]): array
     {
@@ -241,7 +295,7 @@ class KadamApi
      * @param int $offset
      * @param null $type
      * @return mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function getCampaigns(
         $campaignIds = null,
@@ -285,7 +339,7 @@ class KadamApi
      * @param int $offset
      * @param null $type
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function getAdvertisements(
         $campaignIds = null,
@@ -379,7 +433,7 @@ class KadamApi
      * } $fields
      *
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function createCampaign($fields)
     {
@@ -401,7 +455,7 @@ class KadamApi
             }
         }
         if($errorsField) {
-            throw new \Exception('Error: fields required '. \implode(',', $errorsField));
+            throw new ApiErrorException('Error: fields required '. \implode(',', $errorsField));
         }
 
         $campaignData = [
@@ -416,12 +470,12 @@ class KadamApi
         ];
 
         if($campaignData['ad_format'] === 30 && empty($fields['pushType'])) {
-            throw new \Exception("Error: pushType mandatory when type=30");
+            throw new ApiErrorException("Error: pushType mandatory when type=30");
         }
 
         if(empty($fields['url'])) {
             if(empty($fields['realUrl']) || empty($fields['linkUrl'])) {
-                throw new \Exception("Error: if empty 'url' then mandatory 'realUrl' and 'linkUrl'");
+                throw new ApiErrorException("Error: if empty 'url' then mandatory 'realUrl' and 'linkUrl'");
             }
             $campaignData['link_url'] = $fields['linkUrl'];
             $campaignData['real_url'] = $fields['realUrl'];
@@ -456,7 +510,7 @@ class KadamApi
         $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]) || !\intval($result[0])) {
-            throw new \Exception("Error creating campaign: " . \json_encode($result));
+            throw new ApiErrorException("Error creating campaign: " . \json_encode($result));
         }
 
         return $result[0];
@@ -497,7 +551,7 @@ class KadamApi
      * @param $campaignID
      * @param $state
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      * @internal param $id
      */
     public function toggleCampaignState($campaignID, $state)
@@ -515,10 +569,10 @@ class KadamApi
 
         $result = $this->execute_request($url);
         if (empty($result[0]) || !\intval($result[0])) {
-            throw new \Exception("Error in campaign $campaignID changing state");
+            throw new ApiErrorException("Error in campaign $campaignID changing state");
         }
         if (\intval($result[0]) != \intval($campaignID)) {
-            throw new \Exception("Error in campaign $campaignID changing state - Mutual campaign $campaignID != {$result[0]}");
+            throw new ApiErrorException("Error in campaign $campaignID changing state - Mutual campaign $campaignID != {$result[0]}");
         }
         return $result[0];
     }
@@ -529,7 +583,7 @@ class KadamApi
      * @param $materialID
      * @param int $state
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function toggleAdvertisementState($materialID, int $state)
     {
@@ -547,10 +601,10 @@ class KadamApi
         $result = $this->execute_request($url);
 
         if (empty($result[0]['material_id']) || !\intval($result[0]['material_id'])) {
-            throw new \Exception("Error in campaign $materialID changing state");
+            throw new ApiErrorException("Error in campaign $materialID changing state");
         }
         if (\intval($result[0]['material_id']) != \intval($materialID)) {
-            throw new \Exception("Error in campaign $materialID changing state - Mutual campaign $materialID != {$result[0]['material_id']}");
+            throw new ApiErrorException("Error in campaign $materialID changing state - Mutual campaign $materialID != {$result[0]['material_id']}");
         }
         return $result[0];
     }
@@ -560,7 +614,7 @@ class KadamApi
      * enable/disable material state
      * @param array $ids
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function archiveAdvertisements(array $ids = [])
     {
@@ -576,7 +630,7 @@ class KadamApi
 
         // проверяем ответ на наличие
         if (empty($result[0])) {
-            throw new \Exception("Error materials (" . \implode(',', $ids) . ") remove result");
+            throw new ApiErrorException("Error materials (" . \implode(',', $ids) . ") remove result");
         }
 
         // проверяем ответ на качество
@@ -585,7 +639,7 @@ class KadamApi
             if (!empty($info['error'])) $errorMsg .= $info['error']['msg'] . ' (' . $materialID . ')' . "\n";
         }
         if (!empty($errorMsg)) {
-            throw new \Exception($errorMsg);
+            throw new ApiErrorException($errorMsg);
         }
 
         return $result[0];
@@ -597,7 +651,7 @@ class KadamApi
      * @param $campaignID
      * @param $fields
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function updateCampaign($campaignID, $fields)
     {
@@ -620,10 +674,10 @@ class KadamApi
         $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]) || !\intval($result[0])) {
-            throw new \Exception("Error updating campaign");
+            throw new ApiErrorException("Error updating campaign");
         }
         if (\intval($result[0]) != \intval($campaignID)) {
-            throw new \Exception("Error updating campaign - Mutual campaign $campaignID != {$result[0]}");
+            throw new ApiErrorException("Error updating campaign - Mutual campaign $campaignID != {$result[0]}");
         }
 
         return $result[0];
@@ -634,7 +688,7 @@ class KadamApi
      * @param string $link url to file or file content
      * @param int $type 10 - teaser, 20 - banner, 30 - push, 40 - clickunder, 70 - video
      * @return string
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function uploadImage(string $link, int $type): string
     {
@@ -651,10 +705,10 @@ class KadamApi
 
         // error upload image
         if (!empty($result['error'])) {
-            throw new \Exception($result['error']['msg']);
+            throw new ApiErrorException($result['error']['msg']);
         }
         if (empty($result['image'])) {
-            throw new \Exception('Error upload image');
+            throw new ApiErrorException('Error upload image');
         }
 
         return $result['image'];
@@ -675,7 +729,7 @@ class KadamApi
      * @param int $size_avail
      * @param array $bids
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      * @deprecated
      * @see createMaterial
      */
@@ -701,13 +755,13 @@ class KadamApi
      * @param int $type type from campaign (10 - teaser, 20 - banner, 30 - push, 40 - clickunder, 70 - video)
      * @param array $fields
      * @return int
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.2
      */
     public function createMaterial(int $campaignID, int $type, array $fields): int
     {
         if (!(int)$campaignID) {
-            throw new \Exception('The campaign can not be empty');
+            throw new ApiErrorException('The campaign can not be empty');
         }
 
         MaterialValidate::onCreate($type, $fields);
@@ -784,7 +838,7 @@ class KadamApi
         $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]['material_id']) || !(int)$result[0]['material_id']) {
-            throw new \Exception('Error create advertisement');
+            throw new ApiErrorException('Error create advertisement');
         }
 
         return (int) $result[0]['material_id'];
@@ -805,7 +859,7 @@ class KadamApi
      * @param null $size_avail
      * @param array $bids
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      * @deprecated
      * @see updateMaterial
      */
@@ -831,13 +885,13 @@ class KadamApi
      * @param int $materialID
      * @param array $fields
      * @return mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.2
      */
     public function updateMaterial(int $materialID, array $fields = [])
     {
         if (!$materialID) {
-            throw new \Exception("The materialID can not be empty");
+            throw new ApiErrorException("The materialID can not be empty");
         }
 
         $data = [
@@ -914,7 +968,7 @@ class KadamApi
         $result = $this->execute_request($urlContents[0], $urlContents[1]);
 
         if (empty($result[0]['material_id']) || !\intval($result[0]['material_id'])) {
-            throw new \Exception("Error update advertisement");
+            throw new ApiErrorException("Error update advertisement");
         }
 
         return $result[0]['material_id'];
@@ -932,7 +986,7 @@ class KadamApi
      * @param int $limit
      * @param int $offset
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function getCreativeStats(array $campaignIds, array $creativeIds, array $group, string $dateFrom, string $dateTo, $sort = [], $limit = 200, $offset = 0): array
     {
@@ -964,7 +1018,7 @@ class KadamApi
      * @param int $limit
      * @param int $offset
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function getCampaignStats(array $campaignIds, array $group, string $dateFrom, string $dateTo, $sort = [], int $limit = 200, $offset = 0): array
     {
@@ -993,7 +1047,7 @@ class KadamApi
      * @param int $limit
      * @param int $offset
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function getCampaignPlacementStats(array $campaignIds, $dateFrom = null, $dateTo = null, $sort = [], int $limit = 10, $offset = 0): array
     {
@@ -1021,7 +1075,7 @@ class KadamApi
      * @param $placementId
      * @param $multiplier
      * @return array|mixed
-     * @throws \Exception
+     * @throws ApiErrorException
      */
     public function setCampaignPlacementMultiplier($campaignId, $placementId, $multiplier)
     {
@@ -1041,7 +1095,7 @@ class KadamApi
     /**
      * get sizes id for banner advertise
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getBannerSizes(): array
@@ -1054,7 +1108,7 @@ class KadamApi
     /**
      * get ages target
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getAgesTarget(): array
@@ -1067,7 +1121,7 @@ class KadamApi
     /**
      * get browsers target
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getBrowsersTarget(): array
@@ -1080,7 +1134,7 @@ class KadamApi
     /**
      * get platforms target
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getPlatformsTarget(): array
@@ -1094,7 +1148,7 @@ class KadamApi
      * Get languages target
      * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getLangsTarget(array $params = []): array
@@ -1113,7 +1167,7 @@ class KadamApi
      * Get devices target
      * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getDevicesTarget(array $params = []): array
@@ -1132,7 +1186,7 @@ class KadamApi
      * Get countries target
      * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getCountriesTarget(array $params = []): array
@@ -1151,7 +1205,7 @@ class KadamApi
      * Get regions target
      * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getRegionsTarget(array $params = []): array
@@ -1170,7 +1224,7 @@ class KadamApi
      * Get cities target
      * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.4.0
      */
     public function getCitiesTarget(array $params = []): array
@@ -1189,7 +1243,7 @@ class KadamApi
      * Get all geo regions by country
      * @param int $countryId
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.5.0
      */
     public function getGeoRegions(int $countryId): array
@@ -1206,7 +1260,7 @@ class KadamApi
     /**
      * Get all geo countries
      * @return array
-     * @throws \Exception
+     * @throws ApiErrorException
      * @since 1.5.0
      */
     public function getGeoCountries(): array

@@ -16,9 +16,9 @@
         "darkfriend/php7-array": "^1.0"
     },
     "autoload": {
-        "classmap": [
-            "./KadamApi.php",
-            "./MaterialValidate.php"
-        ]
+        "psr-4": {
+            "kadam\\": "",
+            "kadam\\exceptions\\": "exceptions"
+        }
     }
 }

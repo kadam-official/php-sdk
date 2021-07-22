@@ -1,11 +1,9 @@
-# Version 1.4.2
+# Version 1.6.0
 
-* deprecate categories stakes for methods `ads.materials.put `and `ads.materials.post`
-* added support parameter `bids` for stakes in `createMaterial `and `updateMaterial` (also in `createAdvertisement` and `updateAdvertisement`)
-* added deprecate flag for method `createAdvertisement`, use `createMaterial`
-* added deprecate flag for method `updateAdvertisement` use `updateMaterial`
-* added new method `createMaterial`
-* added new method `updateMaterial`
+* added support authorize by bearer token (without signature)
+```php
+$kadamApi = new \kadam\KadamApi($appId, $token, \kadam\KadamApi::MODE_BEARER);
+```
 
 # Version 1.4.0
 

@@ -45,13 +45,25 @@ composer require kadam/php-sdk
 
 ### Step 2
 
+#### Variant 1
+
 ```php
 require_once __DIR__.'/vendor/autoload.php';
 
 $appId = 10;
-$secretKey = 'you_secret_key';
+$secretKey = 'you_secret_key'; // or token if auth by bearer token
 
+// initial with signature
 $kadamApi = new \kadam\KadamApi($appId, $secretKey);
+```
+
+#### Variant 2
+```php
+$appId = 10;
+$token = 'you_bearer_token';
+
+// initial with bearer token
+$kadamApi = new \kadam\KadamApi($appId, $token, \kadam\KadamApi::MODE_BEARER);
 ```
 
 ## <a name="campaign-create"></a> Create Campaign
