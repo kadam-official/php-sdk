@@ -3,7 +3,6 @@
 namespace kadam;
 
 
-use darkfriend\helpers\ArrayHelper;
 use kadam\exceptions\ApiErrorException;
 
 /**
@@ -806,7 +805,7 @@ class KadamApi
             $data['bids'] = $fields['bids'];
         }
 
-        $fields = ArrayHelper::removeByKey($fields, [
+        $fields = $this->_removeByKeys($fields, [
             'client_id',
             'campaign_id',
             'status',
@@ -939,7 +938,7 @@ class KadamApi
             $data['status'] = $fields['status'];
         }
 
-        $fields = ArrayHelper::removeByKey($fields, [
+        $fields = $this->_removeByKeys($fields, [
             'status',
             'type',
             'title',
@@ -1268,5 +1267,22 @@ class KadamApi
         $url = $this->_prepare_url('data.geo.countries.get', []);
 
         return $this->execute_request($url)['response'] ?? [];
+    }
+
+    /**
+     * Remove key from array
+     * @param array $source
+     * @param array $keys
+     * @return array
+     */
+    private function _removeByKeys(array $source, array $keys): array
+    {
+        if(!$source || !$keys) return $source;
+
+        foreach ($keys as $key) {
+            unset($source[$key]);
+        }
+
+        return $source;
     }
 }

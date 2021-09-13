@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: darkfriend <hi@darkfriend.ru>
- * Date: 20.01.2021
- * Time: 15:30
- */
 
 namespace kadam;
 
