@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: darkfriend <hi@darkfriend.ru>
- * Date: 19.01.2021
- * Time: 17:47
- */
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -18,7 +12,7 @@ $id = $kadamApi->updateMaterial(
     $materialId,
     [
         'title' => 'Update title teaser',
-        'linkUrl' => 'https://darkfriend.ru',
+        'linkUrl' => 'https://example.ru',
     ]
 );
 

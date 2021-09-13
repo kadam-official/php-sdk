@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: darkfriend <hi@darkfriend.ru>
- * Date: 02.12.2020
- * Time: 16:13
- */
 
 require_once __DIR__.'/../vendor/autoload.php';
 
@@ -19,8 +13,8 @@ $id = $kadamApi->createCampaign([
     'name' => 'Ads campaign',
 //    'learningPayMode' => 1,
     'leadCost' => 1,
-    'realUrl' => 'https://darkfriend.ru',
-    'linkUrl' => 'https://darkfriend.ru',
+    'realUrl' => 'https://example.ru',
+    'linkUrl' => 'https://example.ru',
     'age' => '1,2,4',
     'gender' => 3,
     'tags' => ['key1', 'key2', 'key3'],
