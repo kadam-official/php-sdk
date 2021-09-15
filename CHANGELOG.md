@@ -1,3 +1,10 @@
+# Version 1.6.0
+
+* added support authorize by bearer token (without signature)
+```php
+$kadamApi = new \kadam\KadamApi($appId, $token, \kadam\KadamApi::MODE_BEARER);
+```
+
 # Version 1.4.2
 
 * deprecate categories stakes for methods `ads.materials.put `and `ads.materials.post`
